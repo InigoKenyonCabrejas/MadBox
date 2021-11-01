@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3921997372685797680}
   - component: {fileID: 5419727471635133190}
   - component: {fileID: 1732254185224081407}
+  - component: {fileID: 8865642905131962609}
   m_Layer: 0
   m_Name: LongSword
   m_TagString: Untagged
@@ -81,3 +82,17 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &8865642905131962609
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 15448191510330147}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 3325006072751462250, guid: d26450d58e3b3c9408c2050beb202688, type: 3}

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e66ffc6d3c84fdfa6984a3bc6b01eb6, type: 3}
+  m_Name: Character
+  m_EditorClassIdentifier: 
+  weapons:
+  - weaponType: 0
+    weaponPrefab: {fileID: 6937623146161485751, guid: 4d0814cafad460246890ec829fa7071d, type: 3}
+    attackSpeedMultiplier: 1
+    heroMovementSpeed: 0.3
+    attackRange: 1.5
+  - weaponType: 1
+    weaponPrefab: {fileID: 478356759475107179, guid: 17cf6e9fc28f3a544bc062d510f66f4a, type: 3}
+    attackSpeedMultiplier: 0.5
+    heroMovementSpeed: 0.1
+    attackRange: 3
+  - weaponType: 2
+    weaponPrefab: {fileID: 15448191510330147, guid: bac79aa2a0057e5429a664d3f336da3d, type: 3}
+    attackSpeedMultiplier: 0.8
+    heroMovementSpeed: 0.2
+    attackRange: 2
