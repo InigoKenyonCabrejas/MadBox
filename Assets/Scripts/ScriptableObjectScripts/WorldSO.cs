@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [CreateAssetMenu(fileName = "World", menuName = "ScriptableObjects/World", order = 1)]
 public class WorldSO : ScriptableObject
@@ -9,6 +10,8 @@ public class WorldSO : ScriptableObject
 
     public int ammountOfSpawns = 200;
     public List<Enemy> allEnemiesData;
+
+    private const string GAME_SCENE = "CombatScene";
 
     private bool isWorldSetup;
 
@@ -28,8 +31,8 @@ public class WorldSO : ScriptableObject
         }
     }
 
-    private List<EnemyManager> aliveEnemies;
-    public List<EnemyManager> AliveEnemies { get { return aliveEnemies; } }
+    private List<EnemyView> aliveEnemies;
+    public List<EnemyView> AliveEnemies { get { return aliveEnemies; } }
 
     public Action WorldIsSetupAction;
     public Action<Weapon, Vector3> LootDroppedAction;
@@ -37,13 +40,22 @@ public class WorldSO : ScriptableObject
     private void OnEnable()
     {
         IsWorldSetup = false;
-        aliveEnemies = new List<EnemyManager>();
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
-    
-    private void OnEnemyDeath(EnemyManager enemy)
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode arg1)
+    {
+        if(string.Equals(scene.name, GAME_SCENE))
+        {
+            aliveEnemies = new List<EnemyView>();
+        }
+    }
+
+    private void OnEnemyDeath(EnemyView enemy)
     {
         RemoveEnemy(enemy);
         LootDroppedAction?.Invoke(armory.GetRandomWeapon(), enemy.transform.position);
+        BoostEnemiesPower();
     }
 
     public Enemy GetEnemyData(EnemyType enemyType)
@@ -59,15 +71,23 @@ public class WorldSO : ScriptableObject
         return null;
     }
 
-    public void AddEnemy(EnemyManager enemy)
+    public void AddEnemy(EnemyView enemy)
     {
         aliveEnemies.Add(enemy);
         enemy.EnemyDeathAction += OnEnemyDeath;
     }
 
-    public void RemoveEnemy(EnemyManager enemy)
+    private void RemoveEnemy(EnemyView enemy)
     {
         aliveEnemies.Remove(enemy);
         enemy.EnemyDeathAction -= OnEnemyDeath;
+    }
+
+    private void BoostEnemiesPower()
+    {
+        for(int i = 0; i < aliveEnemies.Count; i++)
+        {
+            aliveEnemies[i].MakeStronger();
+        }
     }
 }

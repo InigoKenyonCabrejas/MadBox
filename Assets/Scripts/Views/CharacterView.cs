@@ -3,22 +3,26 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class CharacterManager : MonoBehaviour
+public class CharacterView : MonoBehaviour
 {
     [SerializeField] private CharacterSO characterData;
     [SerializeField] private WorldSO worldData;
-    [SerializeField] private DamageDisplayer damageDisplayer;
+    [SerializeField] private NumbersFloater numbersFloater;
     [SerializeField] private Animator characterAnimator;
     [SerializeField] private AnimationClip attackAnimation;
     [SerializeField] private Transform weaponContainer;
+    [SerializeField] private Rigidbody rigidbody;
 
+    private bool isRunning = false;
+    private bool isAttacking = false;
+    private bool isDead = false;
     private Joystick joystick;
     private Vector3 movement;
     private Vector3 lookAtPoint;
     private GameObject currentWeaponObj;
-    private bool isRunning = false;
     private float attackAnimationDuration;
     private Coroutine attackCoroutine;
+    private EnemyView targetEnemy;
 
     private const string RUN_BOOL = "Running";
     private const string DEAD_BOOL = "Dead";
@@ -27,16 +31,13 @@ public class CharacterManager : MonoBehaviour
     private const string CANCEL_ATTACK_TRIGGER = "CancelAttack";
     private const string ATTACK_STATE = "Attack";
 
+    public static CharacterView Character;
+
     public bool IsRunning
     {
         get { return isRunning; }
         set
         {
-            if(isRunning != value && !value)
-            {
-                TryToAttack();
-            }
-
             isRunning = value;
 
             if(isRunning)
@@ -57,6 +58,8 @@ public class CharacterManager : MonoBehaviour
     #region Init&Mono
     private void Awake()
     {
+        Character = this;
+        
         joystick = FindObjectOfType<Joystick>().GetComponent<Joystick>();
         movement = Vector3.zero;
         lookAtPoint = Vector3.zero;
@@ -64,6 +67,8 @@ public class CharacterManager : MonoBehaviour
 
         joystick.MovementUpdateAction += OnMovementUpdate;
         characterData.WeaponChangedAction += OnWeaponChanged;
+        characterData.CharacterDeadAction += OnCharacterDead;
+
     }
 
     private void Start()
@@ -71,17 +76,30 @@ public class CharacterManager : MonoBehaviour
         CreateWeapon();
     }
 
+    private void LateUpdate()
+    {
+        TryToAttack();
+    }
+
     private void OnDestroy()
     {
         joystick.MovementUpdateAction -= OnMovementUpdate;
         characterData.WeaponChangedAction -= OnWeaponChanged;
+        characterData.CharacterDeadAction -= OnCharacterDead;
     }
     #endregion
 
     #region Handlers
     private void OnTriggerEnter(Collider other)
     {
-        PickUpLoot(other.gameObject);
+        Debug.Log("OnTriggerEnter: " + other.gameObject.name);
+        TryToPickUpLoot(other.gameObject);
+    }
+
+    private void OnCollisionEnter(Collision other)
+    {
+        Debug.Log("OnCollisionEnter: " + other.gameObject.name);
+        CheckAndReceiveEnemyAttacked(other.gameObject);
     }
 
     private void OnMovementUpdate(Vector2 dir, float movementStrength)
@@ -94,17 +112,29 @@ public class CharacterManager : MonoBehaviour
         ChangeWeapon();
     }
     
-    private void OnEnemyDeath(EnemyManager enemy)
+    private void OnEnemyDeath(EnemyView enemy)
     {
+        characterData.CurrentScore += enemy.ScoreValue;
         TryToCancelAttack(false);
         
         enemy.EnemyDeathAction -= OnEnemyDeath;
+    }
+    
+    private void OnCharacterDead()
+    {
+        isDead = true;
+        characterAnimator.SetBool(DEAD_BOOL, true);
     }
     #endregion
 
     #region Logic
     private void MoveCharacter(Vector2 dir, float movementStrength)
     {
+        if(isDead)
+        {
+            return;
+        }
+        
         if(movementStrength > 0)
         {
             IsRunning = true;
@@ -122,6 +152,8 @@ public class CharacterManager : MonoBehaviour
 
         dir = dir * (characterData.movementSpeed * characterData.EquipedWeapon.movementSpeedMultiplier * movementStrength);
         movement = new Vector3(dir.x, 0f, dir.y);
+        
+        //rigidbody.MovePosition(transform.position + movement);
         transform.position += movement;
     }
 
@@ -144,8 +176,13 @@ public class CharacterManager : MonoBehaviour
 
     private void TryToAttack()
     {
-        EnemyManager enemy = null;
-        EnemyManager lastInRangeEnemy = null;
+        if(isAttacking || isDead)
+        {
+            return;
+        }
+        
+        EnemyView enemy = null;
+        EnemyView lastInRangeEnemy = null;
         float enemyDistance = -1f;
         float lastInRangeEnemyDistance = -1f;
 
@@ -162,24 +199,28 @@ public class CharacterManager : MonoBehaviour
 
         if(lastInRangeEnemyDistance != -1f && lastInRangeEnemy.IsAlive)
         {
-            AttackEnemy(lastInRangeEnemy);
+            targetEnemy = lastInRangeEnemy;
+            targetEnemy.EnemyDeathAction += OnEnemyDeath;
+            AttackEnemy(targetEnemy);
         }
     }
 
-    private void AttackEnemy(EnemyManager enemy)
+    private void AttackEnemy(EnemyView enemy)
     {
+        isAttacking = true;
+        
         transform.LookAt(enemy.transform);
         characterAnimator.speed = 1f * characterData.EquipedWeapon.attackSpeedMultiplier;
         characterAnimator.SetBool(ATTACK_BOOL, true);
-
-        enemy.EnemyDeathAction += OnEnemyDeath;
-
+        
         attackCoroutine = StartCoroutine(AttackDelayToDamageEnemy(enemy));
     }
 
-    private IEnumerator AttackDelayToDamageEnemy(EnemyManager enemy)
+    private IEnumerator AttackDelayToDamageEnemy(EnemyView enemy)
     {
-        yield return new WaitForSeconds(attackAnimationDuration / characterData.EquipedWeapon.attackSpeedMultiplier);
+        float animDuration = attackAnimationDuration / characterData.EquipedWeapon.attackSpeedMultiplier;
+        
+        yield return new WaitForSeconds((animDuration/3f)*2f);//Wait 2/3 of anim to hit
 
         if(enemy == null)
         {
@@ -188,16 +229,18 @@ public class CharacterManager : MonoBehaviour
         
         if(GetDistanceToEnemyInRange(enemy.transform) != -1)
         {
-            enemy.HitEnemy(characterData.EquipedWeapon.attackDamage);
-            damageDisplayer.ShowDamageFloater(enemy, characterData.EquipedWeapon.attackDamage);
+            enemy.ReceiveHit(characterData.EquipedWeapon.attackDamage);
+            numbersFloater.ShowDamageFloater(enemy.transform.position, characterData.EquipedWeapon.attackDamage, true);
 
             if(enemy.IsAlive)
             {
-                AttackEnemy(enemy);
+                yield return new WaitForSeconds(animDuration/3f);//Wait 1/3 remaining before attacking again
+                AttackEnemy(enemy);//This is were attacks chain with eachother
             }
         }
         else
         {
+            yield return new WaitForSeconds(animDuration/3f);//Wait 1/3 remaining to let the animation finish
             TryToCancelAttack(false);
         }
 
@@ -220,12 +263,19 @@ public class CharacterManager : MonoBehaviour
         {
             StopCoroutine(attackCoroutine);
         }
+
+        if(targetEnemy != null)
+        {
+            targetEnemy.EnemyDeathAction -= OnEnemyDeath;
+            targetEnemy = null;
+        }
         
         characterAnimator.SetBool(ATTACK_BOOL, false);
         characterAnimator.speed = 1f;
+        isAttacking = false;
     }
 
-    private void PickUpLoot(GameObject lootObj)
+    private void TryToPickUpLoot(GameObject lootObj)
     {
         Loot loot = lootObj.GetComponent<Loot>();
 
@@ -236,6 +286,21 @@ public class CharacterManager : MonoBehaviour
         
         characterData.AddNewWeapon(loot.weaponType);
         Destroy(lootObj);
+    }
+
+    private bool CheckAndReceiveEnemyAttacked(GameObject enemyObj)
+    {
+        EnemyView enemy = enemyObj.GetComponent<EnemyView>();
+
+        if(enemy == null)
+        {
+            return false;
+        }
+
+        characterData.CurrentHealth -= enemy.DamageOfAttack;
+        numbersFloater.ShowDamageFloater(transform.position, enemy.DamageOfAttack, false);
+
+        return true;
     }
     #endregion
 

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DamageDisplayer : MonoBehaviour
+public class NumbersFloater : MonoBehaviour
 {
     [SerializeField] private GameObject damageFloaterPrefab;
     [SerializeField] private Transform poolContainer;
@@ -23,7 +23,7 @@ public class DamageDisplayer : MonoBehaviour
         damageFloater.FinishedFloatAction -= OnDamageFloaterFinished;
     }
     
-    public void ShowDamageFloater(EnemyManager enemy,int dmg)
+    public void ShowDamageFloater(Vector3 pos,int dmg, bool isEnemyDamage)
     {
         DamageFloater damageFloater = damageFloaterPool.Pull();
 
@@ -33,11 +33,11 @@ public class DamageDisplayer : MonoBehaviour
         }
         
         damageFloater.transform.SetParent(floatersContainer);
-        damageFloater.transform.position = enemy.transform.position;
+        damageFloater.transform.position = pos;
         
         damageFloater.FinishedFloatAction += OnDamageFloaterFinished;
         dmg *= -1;
-        damageFloater.DisplayDamage(dmg.ToString(), enemy.transform.position);
+        damageFloater.DisplayDamage(dmg.ToString(), pos, isEnemyDamage);
     }
 }
 

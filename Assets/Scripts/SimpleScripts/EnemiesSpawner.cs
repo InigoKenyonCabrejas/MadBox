@@ -21,19 +21,18 @@ public class EnemiesSpawner : MonoBehaviour
     {
         GameObject enemyObj;
         Enemy enemyData;
-        EnemyManager enemy;
+        EnemyView enemy;
         EnemyType enemyType; 
         
         for(int i = 0; i < worldData.ammountOfSpawns; i++)
         {
             enemyType = enemyTypesToSpawn[Random.Range(0, enemyTypesToSpawn.Count)];
-            
             enemyData = worldData.GetEnemyData(enemyType);
             enemyObj = Instantiate(enemyData.enemyPrefab, enemiesContainer);
-            enemyData = new Enemy(enemyData.enemyType, enemyData.health);//Important to declare new Data class or all enemies of type would share onde data instance.
+            enemyData = new Enemy(enemyData);//Important to declare new Data class or all enemies of type would share onde data instance.
             enemyObj.transform.position = CalculateRandomSpawnPosition();
             
-            enemy = enemyObj.GetComponent<EnemyManager>();
+            enemy = enemyObj.GetComponent<EnemyView>();
             enemy.Init(enemyData);
             
             worldData.AddEnemy(enemy);

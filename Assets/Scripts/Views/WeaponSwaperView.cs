@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class WeaponChanger : MonoBehaviour
+public class WeaponSwaperView : MonoBehaviour
 {
     [SerializeField] private CharacterSO characterData;
     [SerializeField] private Button previousWeaponButton;

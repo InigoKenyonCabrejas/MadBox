@@ -187,3 +187,5 @@ MonoBehaviour:
   floatAmmount: 2
   floatDuration: 0.75
   damageText: {fileID: 246879713840915368}
+  hitEnemyColor: {r: 0, g: 0.6603774, b: 0.011159002, a: 1}
+  hitPlayerColor: {r: 1, g: 0, b: 0, a: 1}
