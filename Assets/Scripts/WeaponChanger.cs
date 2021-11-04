@@ -7,11 +7,27 @@ public class WeaponChanger : MonoBehaviour
     [SerializeField] private CharacterSO characterData;
     [SerializeField] private Button previousWeaponButton;
     [SerializeField] private Button nextWeaponButton;
+    [SerializeField] private Text equipedWeaponText;
 
     private void Awake()
     {
         previousWeaponButton.onClick.AddListener(ChangeToPreviousWeapon);
         nextWeaponButton.onClick.AddListener(ChangeToNextWeapon);
+
+        characterData.WeaponChangedAction += OnWeaponChanged;
+    }
+
+    private void Start()
+    {
+        equipedWeaponText.text = characterData.EquipedWeapon.weaponType.ToString();
+    }
+
+    private void OnDestroy()
+    {
+        previousWeaponButton.onClick.RemoveAllListeners();
+        nextWeaponButton.onClick.RemoveAllListeners();
+
+        characterData.WeaponChangedAction -= OnWeaponChanged;
     }
 
     private void Update()
@@ -29,12 +45,17 @@ public class WeaponChanger : MonoBehaviour
         }
     }
 
+    private void OnWeaponChanged()
+    {
+        equipedWeaponText.text = characterData.EquipedWeapon.weaponType.ToString();
+    }
+
     private void ChangeToPreviousWeapon()
     {
         WeaponType currentWeaponType = characterData.EquipedWeapon.weaponType;
         if(currentWeaponType == 0)
         {
-            currentWeaponType = (WeaponType) characterData.weapons.Count - 1;
+            currentWeaponType = (WeaponType)characterData.ownedWeapons.Count - 1;
         }
         else
         {
@@ -47,7 +68,7 @@ public class WeaponChanger : MonoBehaviour
     private void ChangeToNextWeapon()
     {
         WeaponType currentWeaponType = characterData.EquipedWeapon.weaponType;
-        if(currentWeaponType == (WeaponType) characterData.weapons.Count - 1)
+        if(currentWeaponType == (WeaponType)characterData.ownedWeapons.Count - 1)
         {
             currentWeaponType = 0;
         }

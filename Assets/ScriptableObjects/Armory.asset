@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11d8d8b820114444caa4148fadd99c6a, type: 3}
+  m_Name: Armory
+  m_EditorClassIdentifier: 
+  weapons:
+  - weaponType: 0
+    weaponPrefab: {fileID: 6937623146161485751, guid: 4d0814cafad460246890ec829fa7071d, type: 3}
+    attackSpeedMultiplier: 1
+    movementSpeedMultiplier: 1.5
+    attackRange: 1.5
+    attackDamage: 1
+  - weaponType: 1
+    weaponPrefab: {fileID: 478356759475107179, guid: 17cf6e9fc28f3a544bc062d510f66f4a, type: 3}
+    attackSpeedMultiplier: 0.5
+    movementSpeedMultiplier: 0.8
+    attackRange: 2
+    attackDamage: 3
+  - weaponType: 2
+    weaponPrefab: {fileID: 15448191510330147, guid: bac79aa2a0057e5429a664d3f336da3d, type: 3}
+    attackSpeedMultiplier: 0.8
+    movementSpeedMultiplier: 1
+    attackRange: 3
+    attackDamage: 2
+  - weaponType: 3
+    weaponPrefab: {fileID: 6937623146161485751, guid: 176669e402bd3054e93c50dd2181e5f1, type: 3}
+    attackSpeedMultiplier: 0.8
+    movementSpeedMultiplier: 1.5
+    attackRange: 4
+    attackDamage: 5

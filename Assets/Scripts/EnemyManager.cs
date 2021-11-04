@@ -54,14 +54,11 @@ public class EnemyManager : MonoBehaviour
 
     private IEnumerator KillProcess()
     {
-        EnemyDeathAction?.Invoke(this);
-
-        //Wait for death anim if it had one
-
         modelContainer.SetActive(false);
-
+        //Wait for death anim, healthBar lerp, etc...
         yield return new WaitForSeconds(0.5f);
-
+        
+        EnemyDeathAction?.Invoke(this);
         Destroy(gameObject);
     }
     #endregion

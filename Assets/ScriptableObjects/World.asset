@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb11f9e41d5d4c65ba1b269243dd8f10, type: 3}
   m_Name: World
   m_EditorClassIdentifier: 
+  armory: {fileID: 11400000, guid: 9f1d14d9689d33943a5eefd6930d69cd, type: 2}
   ammountOfSpawns: 200
   allEnemiesData:
   - enemyType: 0

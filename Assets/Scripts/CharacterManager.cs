@@ -42,9 +42,9 @@ public class CharacterManager : MonoBehaviour
             if(isRunning)
             {
                 currentWeaponObj.SetActive(false);
-                characterAnimator.speed = 1f * characterData.EquipedWeapon.movementSpeedMultiplier;
                 characterAnimator.SetBool(RUN_BOOL, true);
-                characterAnimator.SetBool(ATTACK_BOOL, false);
+                CancelAttack();
+                characterAnimator.speed = 1f * characterData.EquipedWeapon.movementSpeedMultiplier;
             }
             else
             {
@@ -79,6 +79,11 @@ public class CharacterManager : MonoBehaviour
     #endregion
 
     #region Handlers
+    private void OnTriggerEnter(Collider other)
+    {
+        PickUpLoot(other.gameObject);
+    }
+
     private void OnMovementUpdate(Vector2 dir, float movementStrength)
     {
         MoveCharacter(dir, movementStrength);
@@ -206,6 +211,11 @@ public class CharacterManager : MonoBehaviour
             characterAnimator.SetTrigger(CANCEL_ATTACK_TRIGGER);
         }
 
+        CancelAttack();
+    }
+
+    private void CancelAttack()
+    {
         if(attackCoroutine != null)
         {
             StopCoroutine(attackCoroutine);
@@ -213,6 +223,19 @@ public class CharacterManager : MonoBehaviour
         
         characterAnimator.SetBool(ATTACK_BOOL, false);
         characterAnimator.speed = 1f;
+    }
+
+    private void PickUpLoot(GameObject lootObj)
+    {
+        Loot loot = lootObj.GetComponent<Loot>();
+
+        if(loot == null)
+        {
+            return;
+        }
+        
+        characterData.AddNewWeapon(loot.weaponType);
+        Destroy(lootObj);
     }
     #endregion
 

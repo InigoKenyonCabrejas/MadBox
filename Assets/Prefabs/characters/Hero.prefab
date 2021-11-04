@@ -475,6 +475,8 @@ GameObject:
   m_Component:
   - component: {fileID: 3206923099687242365}
   - component: {fileID: 337934968}
+  - component: {fileID: 5546045936125087422}
+  - component: {fileID: 4398831133946080109}
   m_Layer: 0
   m_Name: Hero
   m_TagString: Untagged
@@ -515,6 +517,36 @@ MonoBehaviour:
   characterAnimator: {fileID: 4278100186079492270}
   attackAnimation: {fileID: 7400000, guid: 8055cf7b50b7f1e4685a28e43661909d, type: 2}
   weaponContainer: {fileID: 1993995369825730728}
+--- !u!136 &5546045936125087422
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3206923099687242354}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  m_Radius: 0.5
+  m_Height: 2.556329
+  m_Direction: 1
+  m_Center: {x: 0, y: 1.2111856, z: 0}
+--- !u!54 &4398831133946080109
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3206923099687242354}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &3512741108777884559
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,6 +5,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "World", menuName = "ScriptableObjects/World", order = 1)]
 public class WorldSO : ScriptableObject
 {
+    [SerializeField] private ArmorySO armory;
+
     public int ammountOfSpawns = 200;
     public List<Enemy> allEnemiesData;
 
@@ -30,6 +32,7 @@ public class WorldSO : ScriptableObject
     public List<EnemyManager> AliveEnemies { get { return aliveEnemies; } }
 
     public Action WorldIsSetupAction;
+    public Action<Weapon, Vector3> LootDroppedAction;
 
     private void OnEnable()
     {
@@ -40,6 +43,7 @@ public class WorldSO : ScriptableObject
     private void OnEnemyDeath(EnemyManager enemy)
     {
         RemoveEnemy(enemy);
+        LootDroppedAction?.Invoke(armory.GetRandomWeapon(), enemy.transform.position);
     }
 
     public Enemy GetEnemyData(EnemyType enemyType)
