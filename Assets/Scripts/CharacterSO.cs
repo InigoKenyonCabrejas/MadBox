@@ -6,6 +6,7 @@ using Random = UnityEngine.Random;
 [CreateAssetMenu(fileName = "Character", menuName = "ScriptableObjects/Character", order = 1)]
 public class CharacterSO : ScriptableObject
 {
+    public float movementSpeed = 0.1f;
     public List<Weapon> weapons;
 
     private Weapon equipedWeapon;
@@ -44,7 +45,8 @@ public class CharacterSO : ScriptableObject
         public WeaponType weaponType;
         public GameObject weaponPrefab;
         public float attackSpeedMultiplier;
-        public float heroMovementSpeed;
+        public float movementSpeedMultiplier;
         public float attackRange;
+        public int attackDamage;
     }
 }

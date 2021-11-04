@@ -21,7 +21,7 @@ public class Joystick : MonoBehaviour
 	private Tweener tween;
 	private float movementStrength;
 
-	public Action<Vector2, float> DirectionAction;
+	public Action<Vector2, float> MovementUpdateAction;
 
 	private void Awake()
 	{
@@ -53,7 +53,7 @@ public class Joystick : MonoBehaviour
 			
 			dirVector = Vector2.zero;
 			movementStrength = 0f;
-			MovementChanged();
+			MovementUpdate();
 		}
 		
 		if(isMouseDown)
@@ -72,13 +72,13 @@ public class Joystick : MonoBehaviour
 				movementStrength = dirVector.magnitude / maxInnerJoystickSeparation;
 			}
 
-			MovementChanged();
+			MovementUpdate();
 		}
 		
-		void MovementChanged()
+		void MovementUpdate()
 		{
 			innerJoystickRectTransform.anchoredPosition = innerJoystickInitialPos + dirVector;
-			DirectionAction?.Invoke(dirVector.normalized, movementStrength);
+			MovementUpdateAction?.Invoke(dirVector.normalized, movementStrength);
 		}
 	}
 }

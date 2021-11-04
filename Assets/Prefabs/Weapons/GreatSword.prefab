@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 3528622160580790136}
   - component: {fileID: 5594360894083726670}
   - component: {fileID: 2206659348807647671}
-  - component: {fileID: 8302376754984064267}
   m_Layer: 0
   m_Name: GreatSword
   m_TagString: Untagged
@@ -82,17 +81,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &8302376754984064267
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 478356759475107179}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -5639042890448948835, guid: aee234d69f5847143a8c129ab4679373, type: 3}

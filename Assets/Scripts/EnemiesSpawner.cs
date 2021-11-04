@@ -27,9 +27,10 @@ public class EnemiesSpawner : MonoBehaviour
         for(int i = 0; i < worldData.ammountOfSpawns; i++)
         {
             enemyType = enemyTypesToSpawn[Random.Range(0, enemyTypesToSpawn.Count)];
-            enemyData = worldData.GetEnemyData(enemyType);
             
+            enemyData = worldData.GetEnemyData(enemyType);
             enemyObj = Instantiate(enemyData.enemyPrefab, enemiesContainer);
+            enemyData = new Enemy(enemyData.enemyType, enemyData.health);//Important to declare new Data class or all enemies of type would share onde data instance.
             enemyObj.transform.position = CalculateRandomSpawnPosition();
             
             enemy = enemyObj.GetComponent<EnemyManager>();
@@ -37,6 +38,8 @@ public class EnemiesSpawner : MonoBehaviour
             
             worldData.AddEnemy(enemy);
         }
+
+        worldData.IsWorldSetup = true;
     }
 
     private Vector3 CalculateRandomSpawnPosition()

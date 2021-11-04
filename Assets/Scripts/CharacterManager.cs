@@ -1,11 +1,15 @@
 using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class CharacterManager : MonoBehaviour
 {
     [SerializeField] private CharacterSO characterData;
     [SerializeField] private WorldSO worldData;
+    [SerializeField] private DamageDisplayer damageDisplayer;
     [SerializeField] private Animator characterAnimator;
+    [SerializeField] private AnimationClip attackAnimation;
     [SerializeField] private Transform weaponContainer;
 
     private Joystick joystick;
@@ -13,6 +17,8 @@ public class CharacterManager : MonoBehaviour
     private Vector3 lookAtPoint;
     private GameObject currentWeaponObj;
     private bool isRunning = false;
+    private float attackAnimationDuration;
+    private Coroutine attackCoroutine;
 
     private const string RUN_BOOL = "Running";
     private const string DEAD_BOOL = "Dead";
@@ -36,7 +42,7 @@ public class CharacterManager : MonoBehaviour
             if(isRunning)
             {
                 currentWeaponObj.SetActive(false);
-                characterAnimator.speed = 1f;
+                characterAnimator.speed = 1f * characterData.EquipedWeapon.movementSpeedMultiplier;
                 characterAnimator.SetBool(RUN_BOOL, true);
                 characterAnimator.SetBool(ATTACK_BOOL, false);
             }
@@ -54,8 +60,9 @@ public class CharacterManager : MonoBehaviour
         joystick = FindObjectOfType<Joystick>().GetComponent<Joystick>();
         movement = Vector3.zero;
         lookAtPoint = Vector3.zero;
+        attackAnimationDuration = attackAnimation.length;
 
-        joystick.DirectionAction += OnDirectionChanged;
+        joystick.MovementUpdateAction += OnMovementUpdate;
         characterData.WeaponChangedAction += OnWeaponChanged;
     }
 
@@ -66,13 +73,13 @@ public class CharacterManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        joystick.DirectionAction -= OnDirectionChanged;
+        joystick.MovementUpdateAction -= OnMovementUpdate;
         characterData.WeaponChangedAction -= OnWeaponChanged;
     }
     #endregion
 
     #region Handlers
-    private void OnDirectionChanged(Vector2 dir, float movementStrength)
+    private void OnMovementUpdate(Vector2 dir, float movementStrength)
     {
         MoveCharacter(dir, movementStrength);
     }
@@ -108,7 +115,7 @@ public class CharacterManager : MonoBehaviour
 
         transform.LookAt(lookAtPoint);
 
-        dir = dir * (characterData.EquipedWeapon.heroMovementSpeed * movementStrength);
+        dir = dir * (characterData.movementSpeed * characterData.EquipedWeapon.movementSpeedMultiplier * movementStrength);
         movement = new Vector3(dir.x, 0f, dir.y);
         transform.position += movement;
     }
@@ -122,7 +129,6 @@ public class CharacterManager : MonoBehaviour
 
         CreateWeapon();
         TryToCancelAttack(true);
-
         TryToAttack();
     }
 
@@ -133,25 +139,64 @@ public class CharacterManager : MonoBehaviour
 
     private void TryToAttack()
     {
-        EnemyManager enemy;
+        EnemyManager enemy = null;
+        EnemyManager lastInRangeEnemy = null;
+        float enemyDistance = -1f;
+        float lastInRangeEnemyDistance = -1f;
 
-        for(int i = 0; i < worldData.AliveEnemies.Count; i++)
+        for(int i = 0; i < worldData.AliveEnemies.Count; i++)//We iterate the full loop looking for closest enemy
         {
             enemy = worldData.AliveEnemies[i];
-            if(IsEnemyInRangeToAttack(enemy.transform))
+            enemyDistance = GetDistanceToEnemyInRange(enemy.transform);
+            if(enemyDistance != -1f && (lastInRangeEnemyDistance == -1 || enemyDistance < lastInRangeEnemyDistance))
             {
-                AttackEnemy(enemy);
+                lastInRangeEnemyDistance = enemyDistance;
+                lastInRangeEnemy = enemy;
             }
+        }
+
+        if(lastInRangeEnemyDistance != -1f && lastInRangeEnemy.IsAlive)
+        {
+            AttackEnemy(lastInRangeEnemy);
         }
     }
 
     private void AttackEnemy(EnemyManager enemy)
     {
         transform.LookAt(enemy.transform);
-        characterAnimator.speed = characterData.EquipedWeapon.attackSpeedMultiplier;
+        characterAnimator.speed = 1f * characterData.EquipedWeapon.attackSpeedMultiplier;
         characterAnimator.SetBool(ATTACK_BOOL, true);
 
         enemy.EnemyDeathAction += OnEnemyDeath;
+
+        attackCoroutine = StartCoroutine(AttackDelayToDamageEnemy(enemy));
+    }
+
+    private IEnumerator AttackDelayToDamageEnemy(EnemyManager enemy)
+    {
+        yield return new WaitForSeconds(attackAnimationDuration / characterData.EquipedWeapon.attackSpeedMultiplier);
+
+        if(enemy == null)
+        {
+            yield break;
+        }
+        
+        if(GetDistanceToEnemyInRange(enemy.transform) != -1)
+        {
+            enemy.HitEnemy(characterData.EquipedWeapon.attackDamage);
+            damageDisplayer.ShowDamageFloater(enemy, characterData.EquipedWeapon.attackDamage);
+
+            if(enemy.IsAlive)
+            {
+                AttackEnemy(enemy);
+            }
+        }
+        else
+        {
+            TryToCancelAttack(false);
+        }
+
+        attackCoroutine = null;
     }
 
     private void TryToCancelAttack(bool isInstantCancelation)
@@ -160,21 +205,28 @@ public class CharacterManager : MonoBehaviour
         {
             characterAnimator.SetTrigger(CANCEL_ATTACK_TRIGGER);
         }
+
+        if(attackCoroutine != null)
+        {
+            StopCoroutine(attackCoroutine);
+        }
         
         characterAnimator.SetBool(ATTACK_BOOL, false);
-        characterAnimator.speed = 1;
+        characterAnimator.speed = 1f;
     }
     #endregion
 
     #region Helpers
-    private bool IsEnemyInRangeToAttack(Transform enemyTransform)
+    private float GetDistanceToEnemyInRange(Transform enemyTransform)
     {
-        if((enemyTransform.position - transform.position).magnitude <= characterData.EquipedWeapon.attackRange)
+        float rangeToEnemy = (enemyTransform.position - transform.position).magnitude;
+        
+        if(rangeToEnemy <= characterData.EquipedWeapon.attackRange)
         {
-            return true;
+            return rangeToEnemy;
         }
 
-        return false;
+        return -1;//-1 represents not in range
     }
     #endregion
 }

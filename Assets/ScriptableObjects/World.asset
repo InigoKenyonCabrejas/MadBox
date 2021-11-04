@@ -16,4 +16,4 @@ MonoBehaviour:
   allEnemiesData:
   - enemyType: 0
     enemyPrefab: {fileID: 1358921057130329688, guid: 41e04faa14fb7a34e8b16750ec910fc3, type: 3}
-    health: 1
+    health: 3

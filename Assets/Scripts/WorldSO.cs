@@ -8,12 +8,32 @@ public class WorldSO : ScriptableObject
     public int ammountOfSpawns = 200;
     public List<Enemy> allEnemiesData;
 
-    private List<EnemyManager> aliveEnemies;
+    private bool isWorldSetup;
 
+    public bool IsWorldSetup
+    {
+        get
+        {
+            return isWorldSetup;
+        }
+        set
+        {
+            isWorldSetup = value;
+            if(isWorldSetup)
+            {
+                WorldIsSetupAction?.Invoke();
+            }
+        }
+    }
+
+    private List<EnemyManager> aliveEnemies;
     public List<EnemyManager> AliveEnemies { get { return aliveEnemies; } }
+
+    public Action WorldIsSetupAction;
 
     private void OnEnable()
     {
+        IsWorldSetup = false;
         aliveEnemies = new List<EnemyManager>();
     }
     
